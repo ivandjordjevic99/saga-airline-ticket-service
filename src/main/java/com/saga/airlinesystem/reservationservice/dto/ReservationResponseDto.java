@@ -1,0 +1,30 @@
+package com.saga.airlinesystem.reservationservice.dto;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
+import lombok.Data;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+@Data
+public class ReservationResponseDto {
+
+    private UUID id;
+
+    private String email;
+
+    @JsonProperty("flight_id")
+    private UUID flightId;
+
+    @JsonProperty("seat_number")
+    private String seatNumber;
+
+    @JsonProperty("created_at")
+    private OffsetDateTime createdAt;
+
+    @JsonProperty("expires_at")
+    private OffsetDateTime expiresAt;
+
+    private ReservationStatus status;
+}
