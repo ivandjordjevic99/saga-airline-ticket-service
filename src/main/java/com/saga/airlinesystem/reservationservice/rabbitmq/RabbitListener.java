@@ -1,28 +1,26 @@
 package com.saga.airlinesystem.reservationservice.rabbitmq;
 
-import com.saga.airlinesystem.reservationservice.dto.ReservationResponseDto;
 import com.saga.airlinesystem.reservationservice.saga.orchestrator.CreateReservationSagaOrchestrator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
+
+import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
 
 @Service
 @RequiredArgsConstructor
 public class RabbitListener {
 
-    private final ObjectMapper objectMapper;
     private final CreateReservationSagaOrchestrator createReservationSagaOrchestrator;
 
-    @org.springframework.amqp.rabbit.annotation.RabbitListener(queues = RabbitConfiguration.RESERVATION_QUEUE)
+    @org.springframework.amqp.rabbit.annotation.RabbitListener(queues = RabbitMQContsants.RESERVATION_QUEUE)
     public void handle(String payload, @Header("amqp_receivedRoutingKey") String routingKey) {
-        ReservationResponseDto reservationResponseDto = objectMapper.readValue(payload, ReservationResponseDto.class);
         switch (routingKey) {
-            case "user.validated":
-                System.out.println("reservation.user_ok" + reservationResponseDto.getEmail());
+            case USER_VALIDATED_KEY, USER_VALIDATION_FAILED_KEY, SEAT_RESERVED_KEY, SEAT_RESERVATION_FAILED_KEY:
+                createReservationSagaOrchestrator.handleEvent(routingKey, payload);
                 break;
             default:
-                System.out.println("Nesto");
+                System.out.println("Nepoznat routing key: " + routingKey);
         }
     }
 

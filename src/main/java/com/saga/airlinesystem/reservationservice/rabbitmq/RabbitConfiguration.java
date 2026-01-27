@@ -4,11 +4,10 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
+
 @Configuration
 public class RabbitConfiguration {
-
-    public static final String RESERVATION_QUEUE = "reservation.events";
-    public static final String TICKET_RESERVATION_EXCHANGE = "ticket-reservation.exchange";
 
     @Bean
     public TopicExchange ticketReservationExchange() {
@@ -21,19 +20,19 @@ public class RabbitConfiguration {
     }
 
     @Bean
-    public Binding userValidatedBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+    public Binding userValidationBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
         return BindingBuilder
                 .bind(reservationQueue)
                 .to(ticketReservationExchange)
-                .with("user.validated");
+                .with(USER_VALIDATION_TOPIC);
     }
 
     @Bean
-    public Binding seatBookedBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+    public Binding flightSeatBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
         return BindingBuilder
                 .bind(reservationQueue)
                 .to(ticketReservationExchange)
-                .with("flight.seat_booked");
+                .with(FLIGHT_SEAT_TOPIC);
     }
 
     @Bean
@@ -41,6 +40,6 @@ public class RabbitConfiguration {
         return BindingBuilder
                 .bind(reservationQueue)
                 .to(ticketReservationExchange)
-                .with("payment.successful");
+                .with(PAYMENT_SUCCESSFUL_KEY);
     }
 }

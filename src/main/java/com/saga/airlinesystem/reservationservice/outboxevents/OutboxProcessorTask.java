@@ -18,14 +18,12 @@ public class OutboxProcessorTask {
     @Scheduled(fixedRate = 5000)
     @Transactional
     public void process() {
-        System.out.println("Processing outbox events");
         List<OutboxEvent> outboxes = outboxEventRepository.findTop10ByStatusOrderByCreatedAtDesc(OutboxEventStatus.PENDING);
 
         for (OutboxEvent outbox : outboxes) {
-            System.out.println("Sending outbox event");
-            reservationProducer.sendReservationCreated(outbox.getPayload());
+            System.out.println("Sending outbox event " + outbox.getRoutingKey() + " on exchange " + outbox.getExchange());
+            reservationProducer.sendEvent(outbox.getExchange(), outbox.getRoutingKey(), outbox.getPayload());
             outbox.setStatus(OutboxEventStatus.SENT);
-            System.out.println("Outbox event sent");
         }
     }
 }

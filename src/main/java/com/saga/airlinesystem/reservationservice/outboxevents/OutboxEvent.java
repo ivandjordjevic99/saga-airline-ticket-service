@@ -19,6 +19,12 @@ public class OutboxEvent {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "exchange", nullable = false)
+    private String exchange;
+
+    @Column(name = "routing_key", nullable = false)
+    private String routingKey;
+
     @Column(name = "payload", columnDefinition = "TEXT", nullable = false)
     private String payload;
 
@@ -29,7 +35,9 @@ public class OutboxEvent {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    public OutboxEvent(String payload) {
+    public OutboxEvent(String exchange, String routingKey, String payload) {
+        this.exchange = exchange;
+        this.routingKey = routingKey;
         this.payload = payload;
         this.status = OutboxEventStatus.PENDING;
         this.createdAt = OffsetDateTime.now();
