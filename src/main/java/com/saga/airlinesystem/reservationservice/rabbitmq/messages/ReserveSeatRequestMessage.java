@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @ToString(callSuper = true)
 @RequiredArgsConstructor
-public class ReserveSeatCommand extends BaseMessage {
+public class ReserveSeatRequestMessage extends BaseMessage {
 
     private final String reservationId;
     private final String flightId;

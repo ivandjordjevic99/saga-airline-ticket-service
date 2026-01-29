@@ -23,6 +23,9 @@ public class ReservationResponseDto {
     @JsonProperty("created_at")
     private OffsetDateTime createdAt;
 
+    @JsonProperty("updated_at")
+    private OffsetDateTime updatedAt;
+
     @JsonProperty("expires_at")
     private OffsetDateTime expiresAt;
 

@@ -28,18 +28,18 @@ public class RabbitConfiguration {
     }
 
     @Bean
+    public Binding userMilesBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+        return BindingBuilder
+                .bind(reservationQueue)
+                .to(ticketReservationExchange)
+                .with(USER_MILES_TOPIC);
+    }
+
+    @Bean
     public Binding flightSeatBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
         return BindingBuilder
                 .bind(reservationQueue)
                 .to(ticketReservationExchange)
                 .with(FLIGHT_SEAT_TOPIC);
-    }
-
-    @Bean
-    public Binding paymentSuccessfulBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
-        return BindingBuilder
-                .bind(reservationQueue)
-                .to(ticketReservationExchange)
-                .with(PAYMENT_SUCCESSFUL_KEY);
     }
 }

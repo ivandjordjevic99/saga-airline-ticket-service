@@ -1,10 +1,6 @@
 package com.saga.airlinesystem.reservationservice.controller;
 
-import com.saga.airlinesystem.reservationservice.dto.ReservationRequestDto;
-import com.saga.airlinesystem.reservationservice.dto.ReservationResponseDto;
-import com.saga.airlinesystem.reservationservice.dto.ReservationUpdatePaymentRequest;
-import com.saga.airlinesystem.reservationservice.dto.ReservationUpdatePaymentResponse;
-import com.saga.airlinesystem.reservationservice.saga.orchestrator.CreateReservationSagaOrchestrator;
+import com.saga.airlinesystem.reservationservice.dto.*;
 import com.saga.airlinesystem.reservationservice.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,12 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ReservationController {
 
-    private final CreateReservationSagaOrchestrator createReservationSagaOrchestrator;
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ReservationResponseDto> createReservation(@RequestBody ReservationRequestDto reservationRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(createReservationSagaOrchestrator.startSaga(reservationRequestDto));
+    public ResponseEntity<ReservationPollingResponseDto> createReservation(@RequestBody ReservationRequestDto reservationRequestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.createReservation(reservationRequestDto));
     }
 
     @PutMapping("/process-payment")

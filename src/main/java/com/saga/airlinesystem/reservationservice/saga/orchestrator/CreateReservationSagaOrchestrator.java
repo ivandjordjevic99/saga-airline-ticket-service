@@ -1,27 +1,23 @@
 package com.saga.airlinesystem.reservationservice.saga.orchestrator;
 
 import com.saga.airlinesystem.reservationservice.dto.ReservationRequestDto;
-import com.saga.airlinesystem.reservationservice.dto.ReservationResponseDto;
 import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
-
 import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
 import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.reservationservice.rabbitmq.RabbitProducer;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.BaseMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ReserveSeatCommand;
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.SeatReservationResultMessage;
+import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UpdateUserMilesResultMessage;
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UserValidationResultMessage;
-import com.saga.airlinesystem.reservationservice.saga.model.CreateReservationSagaStates;
+import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ValidateUserRequestMessage;
+import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
+import com.saga.airlinesystem.reservationservice.saga.commands.*;
 import com.saga.airlinesystem.reservationservice.saga.model.SagaInstance;
+import com.saga.airlinesystem.reservationservice.saga.model.SagaState;
+import com.saga.airlinesystem.reservationservice.saga.model.SagaTransactionType;
 import com.saga.airlinesystem.reservationservice.saga.repository.SagaInstanceRepository;
-import com.saga.airlinesystem.reservationservice.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.databind.ObjectMapper;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
@@ -30,65 +26,61 @@ import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsan
 @RequiredArgsConstructor
 public class CreateReservationSagaOrchestrator {
 
-    private final ReservationService reservationService;
     private final SagaInstanceRepository sagaInstanceRepository;
+    private final ReservationRepository reservationRepository;
     private final OutboxEventService outboxEventService;
-    private final ObjectMapper objectMapper;
+    private final CommandBus commandBus;
 
-    public ReservationResponseDto startSaga(ReservationRequestDto reservationRequestDto) {
-        System.out.println("Starting saga");
-        return reservationService.createReservation(reservationRequestDto);
-    }
+    @Transactional
+    public void startSaga(UUID reservationId, ReservationRequestDto reservationRequestDto) {
+        SagaInstance saga = new SagaInstance(SagaTransactionType.CREATE_RESERVATION, reservationId);
+        sagaInstanceRepository.save(saga);
 
-    public void reserveSeat(String reservationId) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(UUID.fromString(reservationId)).orElseThrow(
-                () -> new ResourceNotFoundException("Saga instance not found"));
-        sagaInstance.setLastStep(CreateReservationSagaStates.USER_VALIDATED.toString());
-        System.out.println("Saga last step updated to: " + sagaInstance.getLastStep());
+        Reservation reservation = new Reservation(
+                reservationId,
+                reservationRequestDto.getEmail(),
+                reservationRequestDto.getFlightId(),
+                reservationRequestDto.getSeatNumber());
+        reservationRepository.save(reservation);
 
-        Reservation reservation = reservationService.getReservationById(UUID.fromString(reservationId));
-
-        ReserveSeatCommand message = new ReserveSeatCommand(
-                reservationId, reservation.getFlightId().toString(), reservation.getEmail(), reservation.getSeatNumber());
-        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, RESERVE_SEAT_REQUEST_KEY, message);
-    }
-
-    public void processSeatReserved(String reservationId) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(UUID.fromString(reservationId)).orElseThrow(
-                () -> new ResourceNotFoundException("Saga instance not found"));
-        sagaInstance.setLastStep(CreateReservationSagaStates.SEAT_RESERVED.toString());
-        System.out.println("Saga last step updated to: " + sagaInstance.getLastStep());
-
-        Reservation reservation = reservationService.getReservationById(UUID.fromString(reservationId));
-        OffsetDateTime expiresAt = OffsetDateTime.now().plusMinutes(2);
-        reservation.setExpiresAt(expiresAt);
-        reservation.setStatus(ReservationStatus.WAITING_FOR_PAYMENT);
-        System.out.println("Reservation updated to: " + reservation.getStatus() + ", expiresAt: " + expiresAt);
+        saga.transitionTo(SagaState.RESERVATION_CREATED);
+        ValidateUserRequestMessage payload = new ValidateUserRequestMessage(reservationId.toString(), reservation.getEmail());
+        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
     }
 
     @Transactional
-    public void handleEvent(String event, String payload) {
-        switch (event) {
-            case USER_VALIDATED_KEY, USER_VALIDATION_FAILED_KEY:
-                UserValidationResultMessage userValidationResultMessage = objectMapper.readValue(payload, UserValidationResultMessage.class);
-                if(event.equals(USER_VALIDATED_KEY)) {
-                    reserveSeat(userValidationResultMessage.getReservationId());
-                } else {
-                    // TODO: Pripremi za polling
-                    System.out.println("User validation error: " + userValidationResultMessage.getResolution());
-                }
-                break;
-            case SEAT_RESERVED_KEY, SEAT_RESERVATION_FAILED_KEY:
-                SeatReservationResultMessage seatReservationResultMessage = objectMapper.readValue(payload, SeatReservationResultMessage.class);
-                if(event.equals(SEAT_RESERVED_KEY)) {
-                    processSeatReserved(seatReservationResultMessage.getReservationId());
-                } else {
-                    // TODO: Pripremi za polling
-                    System.out.println("Seat reservation error:" + seatReservationResultMessage.getResolution());
-                }
-                break;
-            default:
-                System.out.println("Invalid event: " + event);
-        }
+    public void onUserValidated(UserValidationResultMessage payload) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
+                UUID.fromString(payload.getReservationId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        sagaInstance.transitionTo(SagaState.USER_VALIDATED);
+
+        commandBus.send(new ReserveSeatCommand(payload.getReservationId()));
+    }
+
+    @Transactional
+    public void onSeatReserved(SeatReservationResultMessage payload) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
+                UUID.fromString(payload.getReservationId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        sagaInstance.transitionTo(SagaState.SEAT_RESERVED);
+
+        commandBus.send(new PrepareForPaymentCommand(payload.getReservationId(), payload.getMiles()));
+    }
+
+    @Transactional
+    public void onReservationPayed(Reservation reservation) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
+                reservation.getId()).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        sagaInstance.transitionTo(SagaState.RESERVATION_PAYED);
+
+        commandBus.send(new UpdateUserMilesCommand(reservation));
+    }
+
+    @Transactional
+    public void onMilesUpdated(UpdateUserMilesResultMessage payload) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(UUID.fromString(payload.getReservationId())).orElseThrow(
+                () -> new ResourceNotFoundException("Saga instance not found"));
+        sagaInstance.transitionTo(SagaState.MILES_UPDATED);
+
+        commandBus.send(new FinishCreateReservationSagaCommand(payload.getReservationId()));
     }
 }

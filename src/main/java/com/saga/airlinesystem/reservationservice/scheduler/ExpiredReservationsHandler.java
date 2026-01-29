@@ -2,8 +2,6 @@ package com.saga.airlinesystem.reservationservice.scheduler;
 
 import com.saga.airlinesystem.reservationservice.model.Reservation;
 import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEvent;
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventStatus;
 import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;

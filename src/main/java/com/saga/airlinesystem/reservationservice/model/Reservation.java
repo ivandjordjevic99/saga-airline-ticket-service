@@ -14,7 +14,6 @@ import java.util.UUID;
 public class Reservation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
@@ -29,6 +28,12 @@ public class Reservation {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
+
+    @Column(name = "miles")
+    private Integer miles;
+
     @Column(name = "expires_at")
     private OffsetDateTime expiresAt;
 
@@ -36,10 +41,24 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    @PrePersist
-    public void prePersist() {
+    public Reservation(UUID id, String email, UUID flightId, String seatNumber) {
+        this.id = id;
+        this.email = email;
+        this.flightId = flightId;
+        this.seatNumber = seatNumber;
         OffsetDateTime now = OffsetDateTime.now();
         this.createdAt = now;
+        this.updatedAt = now;
         this.status = ReservationStatus.IN_PROGRESS;
+        this.miles = 0;
+    }
+
+    public Reservation() {
+
+    }
+
+    public void setStatus(ReservationStatus status) {
+        this.updatedAt = OffsetDateTime.now();
+        this.status = status;
     }
 }

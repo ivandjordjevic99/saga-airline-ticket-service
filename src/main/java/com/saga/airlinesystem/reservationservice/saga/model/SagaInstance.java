@@ -24,16 +24,26 @@ public class SagaInstance {
     @Column(name = "reservation_id", nullable = false)
     private UUID reservationId;
 
-    @Column(name = "last_step")
-    private String lastStep;
-
     @Column(name = "state", nullable = false)
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private SagaState state;
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
     public SagaInstance() {
-        this.state = "STARTED";
+        this.state = SagaState.STARTED;
+    }
+
+    public SagaInstance(SagaTransactionType transactionType, UUID reservationId) {
+        this.transactionType = transactionType;
+        this.reservationId = reservationId;
+        this.state = SagaState.STARTED;
+        this.updatedAt = OffsetDateTime.now();
+    }
+
+    public void transitionTo(SagaState sagaState) {
+        this.state = sagaState;
+        this.updatedAt = OffsetDateTime.now();
     }
 }
