@@ -6,6 +6,7 @@ import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
 import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
 import com.saga.airlinesystem.reservationservice.saga.commands.PrepareForPaymentCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class PrepareForPaymentCommandHandler implements CommandHandler<PrepareForPaymentCommand> {
 
     private final ReservationRepository reservationRepository;
@@ -23,9 +25,11 @@ public class PrepareForPaymentCommandHandler implements CommandHandler<PrepareFo
     public void handle(PrepareForPaymentCommand command) {
         Reservation reservation = reservationRepository.findById(UUID.fromString(command.getReservationId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
-        OffsetDateTime expiresAt = OffsetDateTime.now().plusMinutes(2);
+        OffsetDateTime expiresAt = OffsetDateTime.now().plusSeconds(50);
         reservation.setMiles(command.getMiles());
         reservation.setExpiresAt(expiresAt);
+
+        log.info("Changing reservation {} status to WAITING_FOR_PAYMENT", reservation.getId());
         reservation.setStatus(ReservationStatus.WAITING_FOR_PAYMENT);
     }
 }

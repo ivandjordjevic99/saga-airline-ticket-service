@@ -6,5 +6,7 @@ public enum ReservationStatus {
     WAITING_FOR_PAYMENT,
     EXPIRED,
     PAYED,
-    TICKETED
+    UPDATING_MILES,
+    TICKETED,
+    DELETED
 }

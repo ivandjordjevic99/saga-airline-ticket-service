@@ -3,6 +3,7 @@ package com.saga.airlinesystem.reservationservice.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Table(name = "reservations")
 @Getter
 @Setter
+@Slf4j
 public class Reservation {
 
     @Id

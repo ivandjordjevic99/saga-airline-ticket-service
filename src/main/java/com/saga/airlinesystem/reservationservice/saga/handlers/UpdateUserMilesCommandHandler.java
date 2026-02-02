@@ -4,6 +4,7 @@ import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UpdateUserMilesRequestMessage;
 import com.saga.airlinesystem.reservationservice.saga.commands.UpdateUserMilesCommand;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsan
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class UpdateUserMilesCommandHandler implements CommandHandler<UpdateUserMilesCommand> {
 
     private final OutboxEventService outboxEventService;
@@ -23,6 +25,7 @@ public class UpdateUserMilesCommandHandler implements CommandHandler<UpdateUserM
                 command.getReservation().getId().toString(),
                 command.getReservation().getEmail(),
                 command.getReservation().getMiles());
+        log.info("Sending update miles request to user service for reservation {}", command.getReservation().getId());
         outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, UPDATE_USER_MILES_REQUEST_KEY, updateUserMilesRequestMessage);
     }
 }

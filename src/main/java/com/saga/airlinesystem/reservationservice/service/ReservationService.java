@@ -11,6 +11,5 @@ import java.util.UUID;
 public interface ReservationService {
 
     ReservationPollingResponseDto createReservation(ReservationRequestDto reservationRequestDto);
-    Reservation getReservationById(UUID reservationId);
     ReservationUpdatePaymentResponse processPayment(ReservationUpdatePaymentRequest reservationUpdatePaymentRequest);
 }

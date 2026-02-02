@@ -8,5 +8,7 @@ public enum SagaState {
     SEAT_RESERVED,
     RESERVATION_PAYED,
     MILES_UPDATED,
-    FINISHED
+    FINISHED,
+    FAILED,
+    COMPENSATED
 }

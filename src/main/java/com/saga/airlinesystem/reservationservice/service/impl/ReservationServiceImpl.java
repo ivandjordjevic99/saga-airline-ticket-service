@@ -9,6 +9,7 @@ import com.saga.airlinesystem.reservationservice.repository.ReservationRepositor
 import com.saga.airlinesystem.reservationservice.saga.orchestrator.CreateReservationSagaOrchestrator;
 import com.saga.airlinesystem.reservationservice.service.ReservationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -26,22 +28,21 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional
     public ReservationPollingResponseDto createReservation(ReservationRequestDto reservationRequestDto) {
         UUID reservationId = UUID.randomUUID();
+        log.info("Create reservation request from: {}, seat number: {}, flight id: {}, reservation id: {}",
+                reservationRequestDto.getEmail(),
+                reservationRequestDto.getSeatNumber(),
+                reservationRequestDto.getFlightId(),
+                reservationId);
         createReservationSagaOrchestrator.startSaga(reservationId, reservationRequestDto);
         ReservationPollingResponseDto response = new ReservationPollingResponseDto();
         response.setId(reservationId);
         return response;
     }
 
-
-    @Override
-    public Reservation getReservationById(UUID reservationId) {
-        return reservationRepository.findById(reservationId).orElseThrow(
-                () -> new ResourceNotFoundException("Reservation not found"));
-    }
-
     @Override
     @Transactional
     public ReservationUpdatePaymentResponse processPayment(ReservationUpdatePaymentRequest reservationUpdatePaymentRequest) {
+        log.info("Processing payment for reservation: {}", reservationUpdatePaymentRequest.getReservationId());
         UUID reservationId = UUID.fromString(reservationUpdatePaymentRequest.getReservationId());
         Reservation lockedReservation = reservationRepository.findByIdWithLock(reservationId)
                 .orElseThrow(() -> new PaymentNotProcessedException("Reservation not found"));
@@ -50,6 +51,7 @@ public class ReservationServiceImpl implements ReservationService {
         reservationUpdatePaymentResponse.setReservationId(reservationId.toString());
 
         if(lockedReservation.getStatus().equals(ReservationStatus.WAITING_FOR_PAYMENT)) {
+            log.info("Changing reservation {} status to PAYED", lockedReservation.getId());
             lockedReservation.setStatus(ReservationStatus.PAYED);
         } else {
             throw new PaymentNotProcessedException();
@@ -57,17 +59,4 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationUpdatePaymentResponse;
     }
 
-    private ReservationResponseDto toDto(Reservation reservation) {
-        ReservationResponseDto reservationResponseDto = new ReservationResponseDto();
-
-        reservationResponseDto.setEmail(reservation.getEmail());
-        reservationResponseDto.setFlightId(reservation.getFlightId());
-        reservationResponseDto.setSeatNumber(reservation.getSeatNumber());
-        reservationResponseDto.setId(reservation.getId());
-        reservationResponseDto.setCreatedAt(reservation.getCreatedAt());
-        reservationResponseDto.setExpiresAt(reservation.getExpiresAt());
-        reservationResponseDto.setStatus(reservation.getStatus());
-
-        return reservationResponseDto;
-    }
 }

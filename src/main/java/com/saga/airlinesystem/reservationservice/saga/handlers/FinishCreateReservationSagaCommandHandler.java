@@ -9,6 +9,7 @@ import com.saga.airlinesystem.reservationservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.reservationservice.saga.model.SagaState;
 import com.saga.airlinesystem.reservationservice.saga.repository.SagaInstanceRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class FinishCreateReservationSagaCommandHandler implements CommandHandler<FinishCreateReservationSagaCommand> {
 
     private final ReservationRepository reservationRepository;
@@ -26,10 +28,13 @@ public class FinishCreateReservationSagaCommandHandler implements CommandHandler
     public void handle(FinishCreateReservationSagaCommand command) {
         Reservation reservation = reservationRepository.findById(UUID.fromString(command.getReservationId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+
+        log.info("Changing reservation {} status to TICKETED", reservation.getId());
         reservation.setStatus(ReservationStatus.TICKETED);
 
         SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(UUID.fromString(command.getReservationId())).orElseThrow(
                 () -> new ResourceNotFoundException("Saga instance not found"));
+        log.info("Transitioning saga instance {} to FINISHED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.FINISHED);
     }
 }
