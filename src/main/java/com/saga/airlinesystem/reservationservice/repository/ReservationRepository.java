@@ -15,7 +15,6 @@ import java.util.UUID;
 public interface ReservationRepository extends JpaRepository<Reservation, UUID> {
 
     List<Reservation> findTop10ByStatusAndExpiresAtIsNotNullOrderByExpiresAtAsc(ReservationStatus status);
-    List<Reservation> findTop10ByStatusOrderByUpdatedAtAsc(ReservationStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Reservation r where r.id = :id")

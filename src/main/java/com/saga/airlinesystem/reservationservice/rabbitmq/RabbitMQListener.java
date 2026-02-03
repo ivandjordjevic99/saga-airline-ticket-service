@@ -12,6 +12,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
 
 
@@ -35,11 +37,11 @@ public class RabbitMQListener {
             case SEAT_RESERVED_KEY:
                 handleSeatReserved(payload);
                 break;
-            case MILES_UPDATED_KEY:
-                handleMilesUpdated(payload);
-                break;
             case USER_VALIDATION_FAILED_KEY:
                 handleUserValidationFailed(payload);
+                break;
+            case SEAT_RESERVATION_FAILED_KEY:
+                handleSeatReservationFailed(payload);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown routing key" + routingKey);
@@ -47,24 +49,30 @@ public class RabbitMQListener {
     }
 
     private void handleUserValidationFailed(String payload) {
+        UserValidationResultMessage userValidationResultMessage = objectMapper.readValue(payload, UserValidationResultMessage.class);
+        log.info("Received user validation result message for reservation {}: {}",
+                userValidationResultMessage.getReservationId(), userValidationResultMessage.getResolution());
+        createReservationSagaOrchestrator.onSagaFailed(UUID.fromString(userValidationResultMessage.getReservationId()));
     }
 
     private void handleUserValidated(String payload) {
         UserValidationResultMessage message = objectMapper.readValue(payload, UserValidationResultMessage.class);
-        log.debug("Received user validated request for reservation {}", message.getReservationId());
+        log.info("Received user validation result message for reservation {}: User validation successful",
+                message.getReservationId());
         createReservationSagaOrchestrator.onUserValidated(message);
     }
 
     private void handleSeatReserved(String payload) {
         SeatReservationResultMessage message = objectMapper.readValue(payload, SeatReservationResultMessage.class);
-        log.debug("Received seat reserved request for reservation {}", message.getReservationId());
+        log.info("Received seat reservation successful event for reservation {}", message.getReservationId());
         createReservationSagaOrchestrator.onSeatReserved(message);
     }
 
-    private void handleMilesUpdated(String payload) {
-        UpdateUserMilesResultMessage message = objectMapper.readValue(payload, UpdateUserMilesResultMessage.class);
-        log.debug("Received miles updated request for reservation {}", message.getReservationId());
-        createReservationSagaOrchestrator.onMilesUpdated(message);
+    private void handleSeatReservationFailed(String payload) {
+        SeatReservationResultMessage message = objectMapper.readValue(payload, SeatReservationResultMessage.class);
+        log.info("Received seat reservation failed event for reservation {}: {}",
+                message.getReservationId(), message.getResolution());
+        createReservationSagaOrchestrator.onSagaFailed(UUID.fromString(message.getReservationId()));
     }
 
 }

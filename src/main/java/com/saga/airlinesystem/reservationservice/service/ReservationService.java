@@ -4,9 +4,6 @@ import com.saga.airlinesystem.reservationservice.dto.ReservationPollingResponseD
 import com.saga.airlinesystem.reservationservice.dto.ReservationRequestDto;
 import com.saga.airlinesystem.reservationservice.dto.ReservationUpdatePaymentRequest;
 import com.saga.airlinesystem.reservationservice.dto.ReservationUpdatePaymentResponse;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-
-import java.util.UUID;
 
 public interface ReservationService {
 

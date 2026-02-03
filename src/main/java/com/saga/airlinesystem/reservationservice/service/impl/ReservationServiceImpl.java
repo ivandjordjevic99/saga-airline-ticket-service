@@ -2,7 +2,6 @@ package com.saga.airlinesystem.reservationservice.service.impl;
 
 import com.saga.airlinesystem.reservationservice.dto.*;
 import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.PaymentNotProcessedException;
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
 import com.saga.airlinesystem.reservationservice.model.Reservation;
 import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
 import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
@@ -53,6 +52,8 @@ public class ReservationServiceImpl implements ReservationService {
         if(lockedReservation.getStatus().equals(ReservationStatus.WAITING_FOR_PAYMENT)) {
             log.info("Changing reservation {} status to PAYED", lockedReservation.getId());
             lockedReservation.setStatus(ReservationStatus.PAYED);
+            reservationRepository.save(lockedReservation);
+            createReservationSagaOrchestrator.onReservationPayed(lockedReservation.getId());
         } else {
             throw new PaymentNotProcessedException();
         }

@@ -42,7 +42,7 @@ public class ExpiredReservationsHandler {
                 lockedReservation.setStatus(ReservationStatus.EXPIRED);
                 reservationRepository.save(lockedReservation);
                 log.warn("Reservation {} expired", lockedReservation.getId());
-                createReservationSagaOrchestrator.onExpiredReservation(lockedReservation.getId());
+                createReservationSagaOrchestrator.onSagaFailed(lockedReservation.getId());
             }
         }
     }

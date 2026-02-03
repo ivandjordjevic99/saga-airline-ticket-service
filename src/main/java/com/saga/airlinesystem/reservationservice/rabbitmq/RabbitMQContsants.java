@@ -24,7 +24,5 @@ public class RabbitMQContsants {
     // user miles routing keys
     public static final String USER_MILES_TOPIC = "user.miles.*";
     public static final String UPDATE_USER_MILES_REQUEST_KEY = "request.user.update-miles";
-    public static final String MILES_UPDATED_KEY = "user.miles.updated";
-    public static final String MILES_UPDATE_FAILED_KEY = "user.miles.update-failed";
 
 }

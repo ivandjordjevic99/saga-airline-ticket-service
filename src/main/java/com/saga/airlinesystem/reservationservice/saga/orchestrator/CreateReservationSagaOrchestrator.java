@@ -5,7 +5,6 @@ import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.Res
 import com.saga.airlinesystem.reservationservice.model.Reservation;
 import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.SeatReservationResultMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UpdateUserMilesResultMessage;
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UserValidationResultMessage;
 import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ValidateUserRequestMessage;
 import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
@@ -40,7 +39,6 @@ public class CreateReservationSagaOrchestrator {
             SagaState.USER_VALIDATED,
             SagaState.SEAT_RESERVED,
             SagaState.RESERVATION_PAYED,
-            SagaState.MILES_UPDATED,
             SagaState.FINISHED
     );
 
@@ -86,27 +84,18 @@ public class CreateReservationSagaOrchestrator {
     }
 
     @Transactional
-    public void onReservationPayed(Reservation reservation) {
+    @Async
+    public void onReservationPayed(UUID reservationId) {
         SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
-                reservation.getId()).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+                reservationId).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
         log.info("Transitioning saga instance {} to RESERVATION_PAYED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.RESERVATION_PAYED);
 
-        commandBus.send(new UpdateUserMilesCommand(reservation));
-    }
-
-    @Transactional
-    public void onMilesUpdated(UpdateUserMilesResultMessage payload) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(UUID.fromString(payload.getReservationId())).orElseThrow(
-                () -> new ResourceNotFoundException("Saga instance not found"));
-        log.info("Transitioning saga instance {} to MILES_UPDATED", sagaInstance.getId());
-        sagaInstance.transitionTo(SagaState.MILES_UPDATED);
-
-        commandBus.send(new FinishCreateReservationSagaCommand(payload.getReservationId()));
+        commandBus.send(new UpdateUserMilesCommand(reservationId));
     }
 
     @Async
-    public void onExpiredReservation(UUID reservationId) {
+    public void onSagaFailed(UUID reservationId) {
         SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(reservationId).orElseThrow(
                 () -> new ResourceNotFoundException("Saga instance not found")
         );
@@ -115,7 +104,7 @@ public class CreateReservationSagaOrchestrator {
 
     private void compensate(SagaInstance sagaInstance) {
         int lastIndex = FLOW.indexOf(sagaInstance.getState());
-        log.info("Transitioning saga instance {} to FAILED", sagaInstance.getId());
+        log.info("Saga instance {} failed on state {}. Transitioning saga instance to FAILED", sagaInstance.getId(), sagaInstance.getState());
         sagaInstance.transitionTo(SagaState.FAILED);
         sagaInstanceRepository.saveAndFlush(sagaInstance);
 
@@ -130,7 +119,6 @@ public class CreateReservationSagaOrchestrator {
     }
 
     private void sendCompensationFor(SagaState sagaState, SagaInstance saga) {
-        System.out.println("Usao ovdje sa" + sagaState);
         switch (sagaState) {
             case RESERVATION_CREATED:
                 log.info("Compensation for {} - {}: Deleting the reservation", saga.getId(), sagaState);
