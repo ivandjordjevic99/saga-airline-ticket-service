@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class ReservationUpdatePaymentResponse {
+public class TicketOrderUpdatePaymentResponse {
 
-    @JsonProperty("reservation_id")
-    private String reservationId;
+    @JsonProperty("ticket_order_id")
+    private String ticketOrderId;
 }

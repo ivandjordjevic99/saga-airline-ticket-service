@@ -2,7 +2,7 @@ package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidateUserRequestMessage;
-import com.saga.airlinesystem.airlineticketservice.saga.commands.StartCreateReservationSagaCommand;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.StartOrderTicketSagaCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,16 +14,16 @@ import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQConts
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class StartCreateReservationSagaCommandHandler implements CommandHandler<StartCreateReservationSagaCommand> {
+public class StartOrderTicketSagaCommandHandler implements CommandHandler<StartOrderTicketSagaCommand> {
 
     private final OutboxEventService outboxEventService;
 
     @Override
     @Transactional
-    public void handle(StartCreateReservationSagaCommand command) {
+    public void handle(StartOrderTicketSagaCommand command) {
         ValidateUserRequestMessage payload = new ValidateUserRequestMessage(
-                command.getReservationId(), command.getEmail());
-        log.info("Sending user validation request to user service for reservation {}", command.getReservationId());
-        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
+                command.getTicketOrderId(), command.getEmail());
+        log.info("Sending user validation request to user service for ticket order {}", command.getTicketOrderId());
+        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
     }
 }

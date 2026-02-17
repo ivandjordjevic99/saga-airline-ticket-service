@@ -7,12 +7,12 @@ import java.util.UUID;
 @Getter
 public class ReserveSeatCommand implements SagaCommand {
 
-    private final String reservationId;
+    private final String ticketOrderId;
     private final UUID commandId;
 
-    public ReserveSeatCommand(String reservationId) {
+    public ReserveSeatCommand(String ticketOrderId) {
         this.commandId = UUID.randomUUID();
-        this.reservationId = reservationId;
+        this.ticketOrderId = ticketOrderId;
     }
 
     @Override

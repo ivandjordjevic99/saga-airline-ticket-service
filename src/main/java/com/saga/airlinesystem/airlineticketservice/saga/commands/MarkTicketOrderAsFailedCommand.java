@@ -5,13 +5,13 @@ import lombok.Getter;
 import java.util.UUID;
 
 @Getter
-public class DeleteReservationCommand implements SagaCommand {
+public class MarkTicketOrderAsFailedCommand implements SagaCommand {
 
-    private final UUID reservationId;
+    private final UUID ticketOrderId;
     private final UUID commandId;
 
-    public DeleteReservationCommand(UUID reservationId) {
-        this.reservationId = reservationId;
+    public MarkTicketOrderAsFailedCommand(UUID ticketOrderId) {
+        this.ticketOrderId = ticketOrderId;
         this.commandId = UUID.randomUUID();
     }
 

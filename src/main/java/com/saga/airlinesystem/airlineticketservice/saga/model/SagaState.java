@@ -3,10 +3,10 @@ package com.saga.airlinesystem.airlineticketservice.saga.model;
 public enum SagaState {
 
     STARTED,
-    RESERVATION_CREATED,
+    TICKET_ORDER_CREATED,
     USER_VALIDATED,
     SEAT_RESERVED,
-    RESERVATION_PAYED,
+    TICKET_ORDER_PAYED,
     FINISHED,
     FAILED,
     COMPENSATED

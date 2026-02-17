@@ -1,13 +1,13 @@
 package com.saga.airlinesystem.airlineticketservice.saga.orchestrator;
 
-import com.saga.airlinesystem.airlineticketservice.dto.ReservationRequestDto;
+import com.saga.airlinesystem.airlineticketservice.dto.TicketOrderRequestDto;
 import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.SeatReservationResultMessage;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UserValidationResultMessage;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidateUserRequestMessage;
-import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
 import com.saga.airlinesystem.airlineticketservice.saga.commands.*;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
@@ -27,76 +27,76 @@ import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQConts
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CreateReservationSagaOrchestrator {
+public class OrderTicketSagaOrchestrator {
 
     private final SagaInstanceRepository sagaInstanceRepository;
-    private final ReservationRepository reservationRepository;
+    private final TicketOrderRepository ticketOrderRepository;
     private final OutboxEventService outboxEventService;
     private final CommandBus commandBus;
     private static final List<SagaState> FLOW = List.of(
             SagaState.STARTED,
-            SagaState.RESERVATION_CREATED,
+            SagaState.TICKET_ORDER_CREATED,
             SagaState.USER_VALIDATED,
             SagaState.SEAT_RESERVED,
-            SagaState.RESERVATION_PAYED,
+            SagaState.TICKET_ORDER_PAYED,
             SagaState.FINISHED
     );
 
     @Transactional
-    public void startSaga(UUID reservationId, ReservationRequestDto reservationRequestDto) {
-        SagaInstance saga = new SagaInstance(SagaTransactionType.CREATE_RESERVATION, reservationId);
+    public void startSaga(UUID ticketOrderId, TicketOrderRequestDto ticketOrderRequestDto) {
+        SagaInstance saga = new SagaInstance(SagaTransactionType.ORDER_TICKET, ticketOrderId);
         sagaInstanceRepository.save(saga);
-        log.info("Saga instance {} for reservation {} created", saga.getId(), reservationId);
+        log.info("Saga instance {} for ticketOrder {} created", saga.getId(), ticketOrderId);
 
-        Reservation reservation = new Reservation(
-                reservationId,
-                reservationRequestDto.getEmail(),
-                reservationRequestDto.getFlightId(),
-                reservationRequestDto.getSeatNumber());
-        reservationRepository.save(reservation);
-        log.info("Reservation {} created", reservation.getId());
+        TicketOrder ticketOrder = new TicketOrder(
+                ticketOrderId,
+                ticketOrderRequestDto.getEmail(),
+                ticketOrderRequestDto.getFlightId(),
+                ticketOrderRequestDto.getSeatNumber());
+        ticketOrderRepository.save(ticketOrder);
+        log.info("TicketOrder {} created", ticketOrder.getId());
 
-        log.info("Transitioning saga instance {} to RESERVATION_CREATED", saga.getId());
-        saga.transitionTo(SagaState.RESERVATION_CREATED);
+        log.info("Transitioning saga instance {} to TICKET_ORDER_CREATED", saga.getId());
+        saga.transitionTo(SagaState.TICKET_ORDER_CREATED);
 
-        ValidateUserRequestMessage payload = new ValidateUserRequestMessage(reservationId.toString(), reservation.getEmail());
-        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
+        ValidateUserRequestMessage payload = new ValidateUserRequestMessage(ticketOrderId.toString(), ticketOrder.getEmail());
+        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
     }
 
     @Transactional
     public void onUserValidated(UserValidationResultMessage payload) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
-                UUID.fromString(payload.getReservationId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
+                UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
         log.info("Transitioning saga instance {} to USER_VALIDATED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.USER_VALIDATED);
 
-        commandBus.send(new ReserveSeatCommand(payload.getReservationId()));
+        commandBus.send(new ReserveSeatCommand(payload.getTicketOrderId()));
     }
 
     @Transactional
     public void onSeatReserved(SeatReservationResultMessage payload) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
-                UUID.fromString(payload.getReservationId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
+                UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
         log.info("Transitioning saga instance {} to SEAT_RESERVED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.SEAT_RESERVED);
 
-        commandBus.send(new PrepareForPaymentCommand(payload.getReservationId(), payload.getMiles()));
+        commandBus.send(new PrepareForPaymentCommand(payload.getTicketOrderId(), payload.getMiles()));
     }
 
     @Transactional
     @Async
-    public void onReservationPayed(UUID reservationId) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(
-                reservationId).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
-        log.info("Transitioning saga instance {} to RESERVATION_PAYED", sagaInstance.getId());
-        sagaInstance.transitionTo(SagaState.RESERVATION_PAYED);
+    public void onTicketOrderPayed(UUID ticketOrderId) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
+                ticketOrderId).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+        log.info("Transitioning saga instance {} to TICKET_ORDER_PAYED", sagaInstance.getId());
+        sagaInstance.transitionTo(SagaState.TICKET_ORDER_PAYED);
 
-        commandBus.send(new UpdateUserMilesCommand(reservationId));
+        commandBus.send(new UpdateUserMilesCommand(ticketOrderId));
     }
 
     @Async
-    public void onSagaFailed(UUID reservationId) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(reservationId).orElseThrow(
+    public void onSagaFailed(UUID ticketOrderId) {
+        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(ticketOrderId).orElseThrow(
                 () -> new ResourceNotFoundException("Saga instance not found")
         );
         compensate(sagaInstance);
@@ -120,13 +120,13 @@ public class CreateReservationSagaOrchestrator {
 
     private void sendCompensationFor(SagaState sagaState, SagaInstance saga) {
         switch (sagaState) {
-            case RESERVATION_CREATED:
-                log.info("Compensation for {} - {}: Deleting the reservation", saga.getId(), sagaState);
-                commandBus.send(new DeleteReservationCommand(saga.getReservationId()));
+            case TICKET_ORDER_CREATED:
+                log.info("Compensation for {} - {}: Marking ticket order as failed", saga.getId(), sagaState);
+                commandBus.send(new MarkTicketOrderAsFailedCommand(saga.getAggregateId()));
                 break;
             case SEAT_RESERVED:
                 log.info("Compensation for {} - {}: Releasing the seat", saga.getId(), sagaState);
-                commandBus.send(new ReleaseSeatCommand(saga.getReservationId()));
+                commandBus.send(new ReleaseSeatCommand(saga.getAggregateId()));
                 break;
             default:
                 log.info("Compensation for {} - {}: No compensation", saga.getId(), sagaState);

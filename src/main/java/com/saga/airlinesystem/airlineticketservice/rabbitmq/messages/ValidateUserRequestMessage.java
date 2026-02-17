@@ -9,6 +9,6 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class ValidateUserRequestMessage extends BaseMessage {
 
-    private final String reservationId;
+    private final String ticketOrderId;
     private final String email;
 }

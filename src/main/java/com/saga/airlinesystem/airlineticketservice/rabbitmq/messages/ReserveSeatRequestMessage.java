@@ -9,7 +9,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class ReserveSeatRequestMessage extends BaseMessage {
 
-    private final String reservationId;
+    private final String ticketOrderId;
     private final String flightId;
     private final String seatNumber;
 }

@@ -11,7 +11,7 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class SeatReservationResultMessage extends BaseMessage {
 
-    private final String reservationId;
+    private final String ticketOrderId;
     private Integer miles;
     private String resolution;
 }

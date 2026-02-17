@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface SagaInstanceRepository extends JpaRepository<SagaInstance, UUID> {
 
-    Optional<SagaInstance> findByReservationId(UUID id);
+    Optional<SagaInstance> findByAggregateId(UUID id);
 }

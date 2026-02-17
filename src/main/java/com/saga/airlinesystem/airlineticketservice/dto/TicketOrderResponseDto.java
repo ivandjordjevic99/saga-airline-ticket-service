@@ -1,14 +1,14 @@
 package com.saga.airlinesystem.airlineticketservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.model.TicketOrderStatus;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
-public class ReservationResponseDto {
+public class TicketOrderResponseDto {
 
     private UUID id;
 
@@ -29,5 +29,5 @@ public class ReservationResponseDto {
     @JsonProperty("expires_at")
     private OffsetDateTime expiresAt;
 
-    private ReservationStatus status;
+    private TicketOrderStatus status;
 }

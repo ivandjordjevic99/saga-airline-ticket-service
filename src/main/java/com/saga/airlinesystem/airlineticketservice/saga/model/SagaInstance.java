@@ -23,8 +23,8 @@ public class SagaInstance {
     @Enumerated(EnumType.STRING)
     private SagaTransactionType transactionType;
 
-    @Column(name = "reservation_id", nullable = false)
-    private UUID reservationId;
+    @Column(name = "aggregate_id", nullable = false)
+    private UUID aggregateId;
 
     @Column(name = "state", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -37,9 +37,9 @@ public class SagaInstance {
         this.state = SagaState.STARTED;
     }
 
-    public SagaInstance(SagaTransactionType transactionType, UUID reservationId) {
+    public SagaInstance(SagaTransactionType transactionType, UUID aggregateId) {
         this.transactionType = transactionType;
-        this.reservationId = reservationId;
+        this.aggregateId = aggregateId;
         this.state = SagaState.STARTED;
         this.updatedAt = OffsetDateTime.now();
     }

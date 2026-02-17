@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ReservationRequestDto {
+public class TicketOrderRequestDto {
 
     @JsonProperty("email")
     private String email;

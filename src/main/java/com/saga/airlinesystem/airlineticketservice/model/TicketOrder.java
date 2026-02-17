@@ -9,11 +9,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "reservations")
+@Table(name = "ticket_orders")
 @Getter
 @Setter
 @Slf4j
-public class Reservation {
+public class TicketOrder {
 
     @Id
     private UUID id;
@@ -41,9 +41,9 @@ public class Reservation {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ReservationStatus status;
+    private TicketOrderStatus status;
 
-    public Reservation(UUID id, String email, UUID flightId, String seatNumber) {
+    public TicketOrder(UUID id, String email, UUID flightId, String seatNumber) {
         this.id = id;
         this.email = email;
         this.flightId = flightId;
@@ -51,15 +51,15 @@ public class Reservation {
         OffsetDateTime now = OffsetDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
-        this.status = ReservationStatus.IN_PROGRESS;
+        this.status = TicketOrderStatus.IN_PROGRESS;
         this.miles = 0;
     }
 
-    public Reservation() {
+    public TicketOrder() {
 
     }
 
-    public void setStatus(ReservationStatus status) {
+    public void setStatus(TicketOrderStatus status) {
         this.updatedAt = OffsetDateTime.now();
         this.status = status;
     }

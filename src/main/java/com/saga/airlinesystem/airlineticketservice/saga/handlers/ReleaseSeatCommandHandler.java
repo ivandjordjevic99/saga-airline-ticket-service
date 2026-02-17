@@ -21,7 +21,7 @@ public class ReleaseSeatCommandHandler implements CommandHandler<ReleaseSeatComm
     @Override
     @Transactional
     public void handle(ReleaseSeatCommand command) {
-        ReleaseSeatMessage message = new ReleaseSeatMessage(command.getReservationId().toString());
-        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, RELEASE_SEAT_REQUEST_KEY, message);
+        ReleaseSeatMessage message = new ReleaseSeatMessage(command.getTicketOrderId().toString());
+        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, RELEASE_SEAT_REQUEST_KEY, message);
     }
 }

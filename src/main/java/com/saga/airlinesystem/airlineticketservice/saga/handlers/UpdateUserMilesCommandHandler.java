@@ -1,11 +1,11 @@
 package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
 import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.airlineticketservice.model.Reservation;
-import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
+import com.saga.airlinesystem.airlineticketservice.model.TicketOrderStatus;
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UpdateUserMilesRequestMessage;
-import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
 import com.saga.airlinesystem.airlineticketservice.saga.commands.UpdateUserMilesCommand;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
@@ -24,28 +24,28 @@ import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQConts
 public class UpdateUserMilesCommandHandler implements CommandHandler<UpdateUserMilesCommand> {
 
     private final OutboxEventService outboxEventService;
-    private final ReservationRepository reservationRepository;
+    private final TicketOrderRepository ticketOrderRepository;
     private final SagaInstanceRepository sagaInstanceRepository;
 
     @Override
     @Transactional
     public void handle(UpdateUserMilesCommand command) {
-        Reservation reservation = reservationRepository.findById(command.getReservationId()).orElseThrow(
-                () -> new ResourceNotFoundException("Reservation with id " + command.getReservationId() + " not found")
+        TicketOrder ticketOrder = ticketOrderRepository.findById(command.getTicketOrderId()).orElseThrow(
+                () -> new ResourceNotFoundException("TicketOrder with id " + command.getTicketOrderId() + " not found")
         );
         UpdateUserMilesRequestMessage updateUserMilesRequestMessage = new UpdateUserMilesRequestMessage(
-                reservation.getId().toString(),
-                reservation.getEmail(),
-                reservation.getMiles());
-        log.info("Sending update miles request to user service for reservation {}", reservation.getId());
-        outboxEventService.persistOutboxEvent(TICKET_RESERVATION_EXCHANGE, UPDATE_USER_MILES_REQUEST_KEY, updateUserMilesRequestMessage);
+                ticketOrder.getId().toString(),
+                ticketOrder.getEmail(),
+                ticketOrder.getMiles());
+        log.info("Sending update miles request to user service for ticketOrder {}", ticketOrder.getId());
+        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, UPDATE_USER_MILES_REQUEST_KEY, updateUserMilesRequestMessage);
 
-        log.info("Changing reservation {} status to TICKETED", reservation.getId());
-        reservation.setStatus(ReservationStatus.TICKETED);
-        reservationRepository.save(reservation);
+        log.info("Changing ticketOrder {} status to TICKETED", ticketOrder.getId());
+        ticketOrder.setStatus(TicketOrderStatus.TICKETED);
+        ticketOrderRepository.save(ticketOrder);
 
-        SagaInstance sagaInstance = sagaInstanceRepository.findByReservationId(reservation.getId()).orElseThrow(
-                () -> new ResourceNotFoundException("SagaInstance with reservation id " + reservation.getId() + " not found")
+        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(ticketOrder.getId()).orElseThrow(
+                () -> new ResourceNotFoundException("SagaInstance with ticketOrder id " + ticketOrder.getId() + " not found")
         );
         log.info("Transitioning saga instance {} to FINISHED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.FINISHED);

@@ -5,14 +5,14 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class StartCreateReservationSagaCommand implements SagaCommand{
+public class StartOrderTicketSagaCommand implements SagaCommand{
 
     private final UUID commandId;
     private final String email;
-    private final String reservationId;
+    private final String ticketOrderId;
 
-    public StartCreateReservationSagaCommand(String reservationId, String email) {
-        this.reservationId = reservationId;
+    public StartOrderTicketSagaCommand(String ticketOrderId, String email) {
+        this.ticketOrderId = ticketOrderId;
         this.email = email;
         this.commandId = UUID.randomUUID();
     }

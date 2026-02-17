@@ -11,6 +11,6 @@ import lombok.ToString;
 @RequiredArgsConstructor
 public class UpdateUserMilesResultMessage extends BaseMessage {
 
-    private final String reservationId;
+    private final String ticketOrderId;
     private String resolution;
 }
