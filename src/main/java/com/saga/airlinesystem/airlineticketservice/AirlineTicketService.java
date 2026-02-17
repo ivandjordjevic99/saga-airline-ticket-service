@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableAsync
-public class ReservationServiceApplication {
+public class AirlineTicketService {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ReservationServiceApplication.class, args);
+		SpringApplication.run(AirlineTicketService.class, args);
 	}
 
 }
