@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.model;
+package com.saga.airlinesystem.airlineticketservice.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

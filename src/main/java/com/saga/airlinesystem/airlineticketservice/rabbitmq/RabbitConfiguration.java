@@ -1,10 +1,10 @@
-package com.saga.airlinesystem.reservationservice.rabbitmq;
+package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.*;
 
 @Configuration
 public class RabbitConfiguration {

@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.saga.repository;
+package com.saga.airlinesystem.airlineticketservice.saga.repository;
 
-import com.saga.airlinesystem.reservationservice.saga.model.SagaInstance;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

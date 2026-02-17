@@ -1,22 +1,22 @@
-package com.saga.airlinesystem.reservationservice.saga.handlers;
+package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UpdateUserMilesRequestMessage;
-import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
-import com.saga.airlinesystem.reservationservice.saga.commands.UpdateUserMilesCommand;
-import com.saga.airlinesystem.reservationservice.saga.model.SagaInstance;
-import com.saga.airlinesystem.reservationservice.saga.model.SagaState;
-import com.saga.airlinesystem.reservationservice.saga.repository.SagaInstanceRepository;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UpdateUserMilesRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.UpdateUserMilesCommand;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
+import com.saga.airlinesystem.airlineticketservice.saga.repository.SagaInstanceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.UPDATE_USER_MILES_REQUEST_KEY;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.UPDATE_USER_MILES_REQUEST_KEY;
 
 @Component
 @RequiredArgsConstructor

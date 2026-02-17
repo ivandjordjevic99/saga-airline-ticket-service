@@ -1,10 +1,10 @@
-package com.saga.airlinesystem.reservationservice.saga.handlers;
+package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
-import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
-import com.saga.airlinesystem.reservationservice.saga.commands.PrepareForPaymentCommand;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.PrepareForPaymentCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

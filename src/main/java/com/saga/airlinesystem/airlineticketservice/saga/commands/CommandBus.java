@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.saga.commands;
+package com.saga.airlinesystem.airlineticketservice.saga.commands;
 
-import com.saga.airlinesystem.reservationservice.saga.handlers.CommandHandler;
+import com.saga.airlinesystem.airlineticketservice.saga.handlers.CommandHandler;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 

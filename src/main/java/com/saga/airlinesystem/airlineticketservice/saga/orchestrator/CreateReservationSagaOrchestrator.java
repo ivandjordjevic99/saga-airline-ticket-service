@@ -1,18 +1,18 @@
-package com.saga.airlinesystem.reservationservice.saga.orchestrator;
+package com.saga.airlinesystem.airlineticketservice.saga.orchestrator;
 
-import com.saga.airlinesystem.reservationservice.dto.ReservationRequestDto;
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.SeatReservationResultMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UserValidationResultMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ValidateUserRequestMessage;
-import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
-import com.saga.airlinesystem.reservationservice.saga.commands.*;
-import com.saga.airlinesystem.reservationservice.saga.model.SagaInstance;
-import com.saga.airlinesystem.reservationservice.saga.model.SagaState;
-import com.saga.airlinesystem.reservationservice.saga.model.SagaTransactionType;
-import com.saga.airlinesystem.reservationservice.saga.repository.SagaInstanceRepository;
+import com.saga.airlinesystem.airlineticketservice.dto.ReservationRequestDto;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.SeatReservationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UserValidationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidateUserRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.*;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
+import com.saga.airlinesystem.airlineticketservice.saga.model.SagaTransactionType;
+import com.saga.airlinesystem.airlineticketservice.saga.repository.SagaInstanceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.*;
 
 @Service
 @RequiredArgsConstructor

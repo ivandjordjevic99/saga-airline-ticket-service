@@ -1,12 +1,12 @@
-package com.saga.airlinesystem.reservationservice.service.impl;
+package com.saga.airlinesystem.airlineticketservice.service.impl;
 
-import com.saga.airlinesystem.reservationservice.dto.*;
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.PaymentNotProcessedException;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
-import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
-import com.saga.airlinesystem.reservationservice.saga.orchestrator.CreateReservationSagaOrchestrator;
-import com.saga.airlinesystem.reservationservice.service.ReservationService;
+import com.saga.airlinesystem.airlineticketservice.dto.*;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.PaymentNotProcessedException;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.orchestrator.CreateReservationSagaOrchestrator;
+import com.saga.airlinesystem.airlineticketservice.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

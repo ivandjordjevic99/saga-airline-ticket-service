@@ -1,7 +1,7 @@
-package com.saga.airlinesystem.reservationservice.controller;
+package com.saga.airlinesystem.airlineticketservice.controller;
 
-import com.saga.airlinesystem.reservationservice.dto.*;
-import com.saga.airlinesystem.reservationservice.service.ReservationService;
+import com.saga.airlinesystem.airlineticketservice.dto.*;
+import com.saga.airlinesystem.airlineticketservice.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice;
+package com.saga.airlinesystem.airlineticketservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.outboxevents;
+package com.saga.airlinesystem.airlineticketservice.outboxevents;
 
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.BaseMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.BaseMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

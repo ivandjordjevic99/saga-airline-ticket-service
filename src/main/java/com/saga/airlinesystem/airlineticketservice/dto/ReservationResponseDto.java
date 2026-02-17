@@ -1,7 +1,7 @@
-package com.saga.airlinesystem.reservationservice.dto;
+package com.saga.airlinesystem.airlineticketservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
 import lombok.Data;
 
 import java.time.OffsetDateTime;

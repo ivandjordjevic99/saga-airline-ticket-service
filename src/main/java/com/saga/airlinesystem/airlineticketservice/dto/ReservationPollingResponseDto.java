@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.dto;
+package com.saga.airlinesystem.airlineticketservice.dto;
 
 import lombok.Data;
 

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.saga.airlinesystem</groupId>
-	<artifactId>reservationservice</artifactId>
+	<artifactId>airlineticketservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>reservationservice</name>
-	<description>Service for reservations</description>
+	<description>Service for airline tickets</description>
 	<url/>
 	<licenses>
 		<license/>

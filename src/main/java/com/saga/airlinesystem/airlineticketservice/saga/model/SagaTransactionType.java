@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.saga.model;
+package com.saga.airlinesystem.airlineticketservice.saga.model;
 
 public enum SagaTransactionType {
 

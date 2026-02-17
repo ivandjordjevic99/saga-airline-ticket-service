@@ -1,7 +1,7 @@
-package com.saga.airlinesystem.reservationservice.repository;
+package com.saga.airlinesystem.airlineticketservice.repository;
 
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.model.ReservationStatus;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.model.ReservationStatus;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.exceptions.customexceptions;
+package com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions;
 
 public class ResourceNotFoundException extends AbstractException {
 

@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.exceptions;
+package com.saga.airlinesystem.airlineticketservice.exceptions;
 
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.AbstractException;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.AbstractException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

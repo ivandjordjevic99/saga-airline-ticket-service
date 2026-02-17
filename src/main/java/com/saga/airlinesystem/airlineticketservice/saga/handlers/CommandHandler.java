@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.saga.handlers;
+package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
-import com.saga.airlinesystem.reservationservice.saga.commands.SagaCommand;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.SagaCommand;
 
 public interface CommandHandler<C extends SagaCommand> {
 

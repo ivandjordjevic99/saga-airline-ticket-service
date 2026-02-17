@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.saga.commands;
+package com.saga.airlinesystem.airlineticketservice.saga.commands;
 
 import java.util.UUID;
 

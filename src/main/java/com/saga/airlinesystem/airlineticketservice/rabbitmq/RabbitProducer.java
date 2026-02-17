@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.rabbitmq;
+package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;

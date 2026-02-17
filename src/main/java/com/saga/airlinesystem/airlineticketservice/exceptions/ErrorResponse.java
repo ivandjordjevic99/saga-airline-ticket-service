@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.exceptions;
+package com.saga.airlinesystem.airlineticketservice.exceptions;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice;
+package com.saga.airlinesystem.airlineticketservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

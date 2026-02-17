@@ -1,11 +1,11 @@
-package com.saga.airlinesystem.reservationservice.saga.handlers;
+package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
-import com.saga.airlinesystem.reservationservice.exceptions.customexceptions.ResourceNotFoundException;
-import com.saga.airlinesystem.reservationservice.model.Reservation;
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ReserveSeatRequestMessage;
-import com.saga.airlinesystem.reservationservice.repository.ReservationRepository;
-import com.saga.airlinesystem.reservationservice.saga.commands.ReserveSeatCommand;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
+import com.saga.airlinesystem.airlineticketservice.model.Reservation;
+import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ReserveSeatRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.repository.ReservationRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.ReserveSeatCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.RESERVE_SEAT_REQUEST_KEY;
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.RESERVE_SEAT_REQUEST_KEY;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
 
 @Component
 @RequiredArgsConstructor

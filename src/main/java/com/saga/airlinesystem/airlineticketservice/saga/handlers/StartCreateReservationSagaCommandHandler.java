@@ -1,15 +1,15 @@
-package com.saga.airlinesystem.reservationservice.saga.handlers;
+package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
-import com.saga.airlinesystem.reservationservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.ValidateUserRequestMessage;
-import com.saga.airlinesystem.reservationservice.saga.commands.StartCreateReservationSagaCommand;
+import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidateUserRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.StartCreateReservationSagaCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.USER_VALIDATION_REQUEST_KEY;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.USER_VALIDATION_REQUEST_KEY;
 
 @Component
 @RequiredArgsConstructor

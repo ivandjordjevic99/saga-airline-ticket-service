@@ -1,9 +1,8 @@
-package com.saga.airlinesystem.reservationservice.rabbitmq;
+package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.SeatReservationResultMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UpdateUserMilesResultMessage;
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.UserValidationResultMessage;
-import com.saga.airlinesystem.reservationservice.saga.orchestrator.CreateReservationSagaOrchestrator;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.SeatReservationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UserValidationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.saga.orchestrator.CreateReservationSagaOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -14,7 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
-import static com.saga.airlinesystem.reservationservice.rabbitmq.RabbitMQContsants.*;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.*;
 
 
 @Service

@@ -1,6 +1,6 @@
-package com.saga.airlinesystem.reservationservice.outboxevents;
+package com.saga.airlinesystem.airlineticketservice.outboxevents;
 
-import com.saga.airlinesystem.reservationservice.rabbitmq.messages.BaseMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.BaseMessage;
 
 public interface OutboxEventService {
 

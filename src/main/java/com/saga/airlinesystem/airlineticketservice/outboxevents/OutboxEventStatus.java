@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.outboxevents;
+package com.saga.airlinesystem.airlineticketservice.outboxevents;
 
 public enum OutboxEventStatus {
 

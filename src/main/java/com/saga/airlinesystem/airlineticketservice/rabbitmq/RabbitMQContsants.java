@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.rabbitmq;
+package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
 public class RabbitMQContsants {
 

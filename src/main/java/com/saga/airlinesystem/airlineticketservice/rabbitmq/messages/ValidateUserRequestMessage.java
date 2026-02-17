@@ -1,4 +1,4 @@
-package com.saga.airlinesystem.reservationservice.rabbitmq.messages;
+package com.saga.airlinesystem.airlineticketservice.rabbitmq.messages;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
