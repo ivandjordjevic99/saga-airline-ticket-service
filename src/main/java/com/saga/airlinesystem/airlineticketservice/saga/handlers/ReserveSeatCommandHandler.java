@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 
 import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.RESERVE_SEAT_REQUEST_KEY;
-import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_BOOKING_EXCHANGE;
 
 @Component
 @RequiredArgsConstructor
@@ -34,6 +34,6 @@ public class ReserveSeatCommandHandler implements CommandHandler<ReserveSeatComm
         ReserveSeatRequestMessage message = new ReserveSeatRequestMessage(
                 command.getTicketOrderId(), ticketOrder.getFlightId().toString(), ticketOrder.getSeatNumber()
         );
-        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, RESERVE_SEAT_REQUEST_KEY, message);
+        outboxEventService.saveOutboxEvent(TICKET_BOOKING_EXCHANGE, RESERVE_SEAT_REQUEST_KEY, message);
     }
 }

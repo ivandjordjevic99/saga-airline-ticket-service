@@ -4,9 +4,9 @@ import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.R
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrderStatus;
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
-import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UpdateUserMilesRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UpdatePassengerMilesRequestMessage;
 import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
-import com.saga.airlinesystem.airlineticketservice.saga.commands.UpdateUserMilesCommand;
+import com.saga.airlinesystem.airlineticketservice.saga.commands.UpdatePassengerMilesCommand;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
 import com.saga.airlinesystem.airlineticketservice.saga.repository.SagaInstanceRepository;
@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_RESERVATION_EXCHANGE;
-import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.UPDATE_USER_MILES_REQUEST_KEY;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.TICKET_BOOKING_EXCHANGE;
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.UPDATE_PASSENGER_MILES_REQUEST_KEY;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UpdateUserMilesCommandHandler implements CommandHandler<UpdateUserMilesCommand> {
+public class UpdatePassengerMilesCommandHandler implements CommandHandler<UpdatePassengerMilesCommand> {
 
     private final OutboxEventService outboxEventService;
     private final TicketOrderRepository ticketOrderRepository;
@@ -29,16 +29,16 @@ public class UpdateUserMilesCommandHandler implements CommandHandler<UpdateUserM
 
     @Override
     @Transactional
-    public void handle(UpdateUserMilesCommand command) {
+    public void handle(UpdatePassengerMilesCommand command) {
         TicketOrder ticketOrder = ticketOrderRepository.findById(command.getTicketOrderId()).orElseThrow(
                 () -> new ResourceNotFoundException("TicketOrder with id " + command.getTicketOrderId() + " not found")
         );
-        UpdateUserMilesRequestMessage updateUserMilesRequestMessage = new UpdateUserMilesRequestMessage(
+        UpdatePassengerMilesRequestMessage updatePassengerMilesRequestMessage = new UpdatePassengerMilesRequestMessage(
                 ticketOrder.getId().toString(),
                 ticketOrder.getEmail(),
                 ticketOrder.getMiles());
-        log.info("Sending update miles request to user service for ticketOrder {}", ticketOrder.getId());
-        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, UPDATE_USER_MILES_REQUEST_KEY, updateUserMilesRequestMessage);
+        log.info("Sending update miles request to passenger service for ticketOrder {}", ticketOrder.getId());
+        outboxEventService.saveOutboxEvent(TICKET_BOOKING_EXCHANGE, UPDATE_PASSENGER_MILES_REQUEST_KEY, updatePassengerMilesRequestMessage);
 
         log.info("Changing ticketOrder {} status to TICKETED", ticketOrder.getId());
         ticketOrder.setStatus(TicketOrderStatus.TICKETED);

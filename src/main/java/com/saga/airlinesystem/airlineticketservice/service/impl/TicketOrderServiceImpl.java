@@ -2,6 +2,7 @@ package com.saga.airlinesystem.airlineticketservice.service.impl;
 
 import com.saga.airlinesystem.airlineticketservice.dto.*;
 import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.PaymentNotProcessedException;
+import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrderStatus;
 import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
@@ -25,7 +26,7 @@ public class TicketOrderServiceImpl implements TicketOrderService {
 
     @Override
     @Transactional
-    public TicketOrderPollingResponseDto createTicketOrder(TicketOrderRequestDto ticketOrderRequestDto) {
+    public CreateTicketOrderResponseDto createTicketOrder(TicketOrderRequestDto ticketOrderRequestDto) {
         UUID ticketOrderId = UUID.randomUUID();
         log.info("Create order ticket request from: {}, seat number: {}, flight id: {}, ticket order id: {}",
                 ticketOrderRequestDto.getEmail(),
@@ -33,8 +34,8 @@ public class TicketOrderServiceImpl implements TicketOrderService {
                 ticketOrderRequestDto.getFlightId(),
                 ticketOrderId);
         orderTicketSagaOrchestrator.startSaga(ticketOrderId, ticketOrderRequestDto);
-        TicketOrderPollingResponseDto response = new TicketOrderPollingResponseDto();
-        response.setId(ticketOrderId);
+        CreateTicketOrderResponseDto response = new CreateTicketOrderResponseDto();
+        response.setTicketOrderId(ticketOrderId);
         return response;
     }
 
@@ -58,6 +59,23 @@ public class TicketOrderServiceImpl implements TicketOrderService {
             throw new PaymentNotProcessedException();
         }
         return ticketOrderUpdatePaymentResponse;
+    }
+
+    @Override
+    public TicketOrderResponseDto getTicketOrderById(UUID ticketOrderId) {
+        TicketOrder ticketOrder = ticketOrderRepository.findById(ticketOrderId).orElseThrow(
+                () -> new ResourceNotFoundException("TicketOrder not found")
+        );
+        TicketOrderResponseDto ticketOrderResponseDto = new TicketOrderResponseDto();
+        ticketOrderResponseDto.setId(ticketOrder.getId());
+        ticketOrderResponseDto.setEmail(ticketOrder.getEmail());
+        ticketOrderResponseDto.setSeatNumber(ticketOrder.getSeatNumber());
+        ticketOrderResponseDto.setFlightId(ticketOrder.getFlightId());
+        ticketOrderResponseDto.setStatus(ticketOrder.getStatus());
+        ticketOrderResponseDto.setCreatedAt(ticketOrder.getCreatedAt());
+        ticketOrderResponseDto.setUpdatedAt(ticketOrder.getUpdatedAt());
+        ticketOrderResponseDto.setExpiresAt(ticketOrder.getExpiresAt());
+        return ticketOrderResponseDto;
     }
 
 }

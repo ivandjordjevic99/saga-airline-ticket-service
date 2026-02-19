@@ -1,7 +1,7 @@
 package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.SeatReservationResultMessage;
-import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UserValidationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.PassengerValidationResultMessage;
 import com.saga.airlinesystem.airlineticketservice.saga.orchestrator.OrderTicketSagaOrchestrator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,20 +24,20 @@ public class RabbitMQListener {
     private final OrderTicketSagaOrchestrator orderTicketSagaOrchestrator;
     private final ObjectMapper objectMapper;
 
-    @RabbitListener(queues = RESERVATION_QUEUE)
+    @RabbitListener(queues = TICKET_QUEUE)
     public void handleMessage(
             String payload,
             @Header(AmqpHeaders.RECEIVED_ROUTING_KEY) String routingKey
     ) {
         switch (routingKey) {
-            case USER_VALIDATED_KEY:
-                handleUserValidated(payload);
+            case PASSENGER_VALIDATED_KEY:
+                handlePassengerValidated(payload);
                 break;
             case SEAT_RESERVED_KEY:
                 handleSeatReserved(payload);
                 break;
-            case USER_VALIDATION_FAILED_KEY:
-                handleUserValidationFailed(payload);
+            case PASSENGER_VALIDATION_FAILED_KEY:
+                handlePassengerValidationFailed(payload);
                 break;
             case SEAT_RESERVATION_FAILED_KEY:
                 handleSeatReservationFailed(payload);
@@ -47,29 +47,29 @@ public class RabbitMQListener {
         }
     }
 
-    private void handleUserValidationFailed(String payload) {
-        UserValidationResultMessage userValidationResultMessage = objectMapper.readValue(payload, UserValidationResultMessage.class);
-        log.info("Received user validation result message for reservation {}: {}",
-                userValidationResultMessage.getTicketOrderId(), userValidationResultMessage.getResolution());
-        orderTicketSagaOrchestrator.onSagaFailed(UUID.fromString(userValidationResultMessage.getTicketOrderId()));
+    private void handlePassengerValidationFailed(String payload) {
+        PassengerValidationResultMessage passengerValidationResultMessage = objectMapper.readValue(payload, PassengerValidationResultMessage.class);
+        log.info("Received passenger validation result message for ticket order {}: {}",
+                passengerValidationResultMessage.getTicketOrderId(), passengerValidationResultMessage.getResolution());
+        orderTicketSagaOrchestrator.onSagaFailed(UUID.fromString(passengerValidationResultMessage.getTicketOrderId()));
     }
 
-    private void handleUserValidated(String payload) {
-        UserValidationResultMessage message = objectMapper.readValue(payload, UserValidationResultMessage.class);
-        log.info("Received user validation result message for reservation {}: User validation successful",
+    private void handlePassengerValidated(String payload) {
+        PassengerValidationResultMessage message = objectMapper.readValue(payload, PassengerValidationResultMessage.class);
+        log.info("Received passenger validation result message for ticket order {}: Passenger validation successful",
                 message.getTicketOrderId());
-        orderTicketSagaOrchestrator.onUserValidated(message);
+        orderTicketSagaOrchestrator.onPassengerValidated(message);
     }
 
     private void handleSeatReserved(String payload) {
         SeatReservationResultMessage message = objectMapper.readValue(payload, SeatReservationResultMessage.class);
-        log.info("Received seat reservation successful event for reservation {}", message.getTicketOrderId());
+        log.info("Received seat reservation successful event for ticket order {}", message.getTicketOrderId());
         orderTicketSagaOrchestrator.onSeatReserved(message);
     }
 
     private void handleSeatReservationFailed(String payload) {
         SeatReservationResultMessage message = objectMapper.readValue(payload, SeatReservationResultMessage.class);
-        log.info("Received seat reservation failed event for reservation {}: {}",
+        log.info("Received seat reservation failed event for ticket order {}: {}",
                 message.getTicketOrderId(), message.getResolution());
         orderTicketSagaOrchestrator.onSagaFailed(UUID.fromString(message.getTicketOrderId()));
     }

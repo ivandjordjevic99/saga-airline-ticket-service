@@ -2,17 +2,17 @@ package com.saga.airlinesystem.airlineticketservice.rabbitmq;
 
 public class RabbitMQContsants {
 
-    // exchanges
-    public static final String TICKET_RESERVATION_EXCHANGE = "ticket-reservation.exchange";
-
     // queue
-    public static final String RESERVATION_QUEUE = "reservation.events";
+    public static final String TICKET_QUEUE = "ticket.events";
 
-    // user validation routing keys
-    public static final String USER_VALIDATION_TOPIC = "user.validation.*";
-    public static final String USER_VALIDATION_REQUEST_KEY = "request.user.validation";
-    public static final String USER_VALIDATED_KEY = "user.validation.validated";
-    public static final String USER_VALIDATION_FAILED_KEY = "user.validation.failed";
+    // exchanges
+    public static final String TICKET_BOOKING_EXCHANGE = "ticket-booking.exchange";
+
+    // passenger validation routing keys
+    public static final String PASSENGER_VALIDATION_TOPIC = "passenger.validation.*";
+    public static final String PASSENGER_VALIDATION_REQUEST_KEY = "request.passenger.validation";
+    public static final String PASSENGER_VALIDATED_KEY = "passenger.validation.validated";
+    public static final String PASSENGER_VALIDATION_FAILED_KEY = "passenger.validation.failed";
 
     // flight routing keys
     public static final String FLIGHT_SEAT_TOPIC = "flight.seat.*";
@@ -21,8 +21,8 @@ public class RabbitMQContsants {
     public static final String SEAT_RESERVATION_FAILED_KEY = "flight.seat.reservation_failed";
     public static final String RELEASE_SEAT_REQUEST_KEY = "request.flight.seat.release";
 
-    // user miles routing keys
-    public static final String USER_MILES_TOPIC = "user.miles.*";
-    public static final String UPDATE_USER_MILES_REQUEST_KEY = "request.user.update-miles";
+    // passenger miles routing keys
+    public static final String PASSENGER_MILES_TOPIC = "passenger.miles.*";
+    public static final String UPDATE_PASSENGER_MILES_REQUEST_KEY = "request.passenger.update-miles";
 
 }

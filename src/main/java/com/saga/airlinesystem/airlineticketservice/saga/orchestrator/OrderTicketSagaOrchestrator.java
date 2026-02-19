@@ -5,8 +5,8 @@ import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.R
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.SeatReservationResultMessage;
-import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.UserValidationResultMessage;
-import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidateUserRequestMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.PassengerValidationResultMessage;
+import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ValidatePassengerRequestMessage;
 import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
 import com.saga.airlinesystem.airlineticketservice.saga.commands.*;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
@@ -36,7 +36,7 @@ public class OrderTicketSagaOrchestrator {
     private static final List<SagaState> FLOW = List.of(
             SagaState.STARTED,
             SagaState.TICKET_ORDER_CREATED,
-            SagaState.USER_VALIDATED,
+            SagaState.PASSENGER_VALIDATED,
             SagaState.SEAT_RESERVED,
             SagaState.TICKET_ORDER_PAYED,
             SagaState.FINISHED
@@ -44,10 +44,12 @@ public class OrderTicketSagaOrchestrator {
 
     @Transactional
     public void startSaga(UUID ticketOrderId, TicketOrderRequestDto ticketOrderRequestDto) {
+        // Kreiranje saga instance koja prati biljezi dokle je stigla saga
         SagaInstance saga = new SagaInstance(SagaTransactionType.ORDER_TICKET, ticketOrderId);
         sagaInstanceRepository.save(saga);
         log.info("Saga instance {} for ticketOrder {} created", saga.getId(), ticketOrderId);
 
+        // Kreiranje objekta
         TicketOrder ticketOrder = new TicketOrder(
                 ticketOrderId,
                 ticketOrderRequestDto.getEmail(),
@@ -59,16 +61,17 @@ public class OrderTicketSagaOrchestrator {
         log.info("Transitioning saga instance {} to TICKET_ORDER_CREATED", saga.getId());
         saga.transitionTo(SagaState.TICKET_ORDER_CREATED);
 
-        ValidateUserRequestMessage payload = new ValidateUserRequestMessage(ticketOrderId.toString(), ticketOrder.getEmail());
-        outboxEventService.saveOutboxEvent(TICKET_RESERVATION_EXCHANGE, USER_VALIDATION_REQUEST_KEY, payload);
+        // Cuvanje outbox eventa
+        ValidatePassengerRequestMessage payload = new ValidatePassengerRequestMessage(ticketOrderId.toString(), ticketOrder.getEmail());
+        outboxEventService.saveOutboxEvent(TICKET_BOOKING_EXCHANGE, PASSENGER_VALIDATION_REQUEST_KEY, payload);
     }
 
     @Transactional
-    public void onUserValidated(UserValidationResultMessage payload) {
+    public void onPassengerValidated(PassengerValidationResultMessage payload) {
         SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
                 UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
-        log.info("Transitioning saga instance {} to USER_VALIDATED", sagaInstance.getId());
-        sagaInstance.transitionTo(SagaState.USER_VALIDATED);
+        log.info("Transitioning saga instance {} to PASSENGER_VALIDATED", sagaInstance.getId());
+        sagaInstance.transitionTo(SagaState.PASSENGER_VALIDATED);
 
         commandBus.send(new ReserveSeatCommand(payload.getTicketOrderId()));
     }
@@ -91,7 +94,7 @@ public class OrderTicketSagaOrchestrator {
         log.info("Transitioning saga instance {} to TICKET_ORDER_PAYED", sagaInstance.getId());
         sagaInstance.transitionTo(SagaState.TICKET_ORDER_PAYED);
 
-        commandBus.send(new UpdateUserMilesCommand(ticketOrderId));
+        commandBus.send(new UpdatePassengerMilesCommand(ticketOrderId));
     }
 
     @Async

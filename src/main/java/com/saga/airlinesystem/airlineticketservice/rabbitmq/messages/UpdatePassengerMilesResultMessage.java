@@ -9,9 +9,8 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true)
 @RequiredArgsConstructor
-public class UserValidationResultMessage extends BaseMessage {
+public class UpdatePassengerMilesResultMessage extends BaseMessage {
 
     private final String ticketOrderId;
-    private final String email;
     private String resolution;
 }

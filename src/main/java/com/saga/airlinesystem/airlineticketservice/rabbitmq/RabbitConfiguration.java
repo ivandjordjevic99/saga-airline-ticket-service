@@ -10,36 +10,36 @@ import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQConts
 public class RabbitConfiguration {
 
     @Bean
-    public TopicExchange ticketReservationExchange() {
-        return new TopicExchange(TICKET_RESERVATION_EXCHANGE);
+    public TopicExchange ticketBookingExchange() {
+        return new TopicExchange(TICKET_BOOKING_EXCHANGE);
     }
 
     @Bean
-    public Queue reservationQueue() {
-        return new Queue(RESERVATION_QUEUE, true);
+    public Queue ticketQueue() {
+        return new Queue(TICKET_QUEUE, true);
     }
 
     @Bean
-    public Binding userValidationBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+    public Binding passengerValidationBinding(Queue ticketQueue, TopicExchange ticketBookingExchange) {
         return BindingBuilder
-                .bind(reservationQueue)
-                .to(ticketReservationExchange)
-                .with(USER_VALIDATION_TOPIC);
+                .bind(ticketQueue)
+                .to(ticketBookingExchange)
+                .with(PASSENGER_VALIDATION_TOPIC);
     }
 
     @Bean
-    public Binding userMilesBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+    public Binding passengerMilesBinding(Queue ticketQueue, TopicExchange ticketBookingExchange) {
         return BindingBuilder
-                .bind(reservationQueue)
-                .to(ticketReservationExchange)
-                .with(USER_MILES_TOPIC);
+                .bind(ticketQueue)
+                .to(ticketBookingExchange)
+                .with(PASSENGER_MILES_TOPIC);
     }
 
     @Bean
-    public Binding flightSeatBinding(Queue reservationQueue, TopicExchange ticketReservationExchange) {
+    public Binding flightSeatBinding(Queue ticketQueue, TopicExchange ticketBookingExchange) {
         return BindingBuilder
-                .bind(reservationQueue)
-                .to(ticketReservationExchange)
+                .bind(ticketQueue)
+                .to(ticketBookingExchange)
                 .with(FLIGHT_SEAT_TOPIC);
     }
 }
