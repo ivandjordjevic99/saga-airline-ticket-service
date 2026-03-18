@@ -2,6 +2,7 @@ package com.saga.airlinesystem.airlineticketservice.saga.handlers;
 
 import com.saga.airlinesystem.airlineticketservice.exceptions.customexceptions.ResourceNotFoundException;
 import com.saga.airlinesystem.airlineticketservice.model.TicketOrder;
+import com.saga.airlinesystem.airlineticketservice.model.TicketOrderStatus;
 import com.saga.airlinesystem.airlineticketservice.outboxevents.OutboxEventService;
 import com.saga.airlinesystem.airlineticketservice.rabbitmq.messages.ReserveSeatRequestMessage;
 import com.saga.airlinesystem.airlineticketservice.repository.TicketOrderRepository;
@@ -28,12 +29,16 @@ public class ReserveSeatCommandHandler implements CommandHandler<ReserveSeatComm
     @Transactional
     public void handle(ReserveSeatCommand command) {
         TicketOrder ticketOrder = ticketOrderRepository.findById(UUID.fromString(command.getTicketOrderId()))
-                .orElseThrow(() -> new ResourceNotFoundException("TicketOrder not found"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket order with id " + command.getTicketOrderId() + " not found"));
+        if(!ticketOrder.getStatus().equals(TicketOrderStatus.CREATED)) {
+            log.warn("Rejecting this command: Seat reservation already requested for this ticket order {}", command.getTicketOrderId());
+            return;
+        }
         log.info("Sending seat ticketOrder request to flight service for ticketOrder {}", ticketOrder.getId());
         ReserveSeatRequestMessage message = new ReserveSeatRequestMessage(
                 command.getTicketOrderId(), ticketOrder.getFlightId().toString(), ticketOrder.getSeatNumber()
         );
         outboxEventService.saveOutboxEvent(TICKET_BOOKING_EXCHANGE, RESERVE_SEAT_REQUEST_KEY, message);
+        ticketOrder.setStatus(TicketOrderStatus.SEAT_RESERVATION_REQUESTED);
     }
 }

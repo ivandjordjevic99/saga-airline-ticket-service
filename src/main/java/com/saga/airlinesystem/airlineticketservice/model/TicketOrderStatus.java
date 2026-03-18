@@ -2,7 +2,8 @@ package com.saga.airlinesystem.airlineticketservice.model;
 
 public enum TicketOrderStatus {
 
-    IN_PROGRESS,
+    CREATED,
+    SEAT_RESERVATION_REQUESTED,
     WAITING_FOR_PAYMENT,
     EXPIRED,
     PAYED,

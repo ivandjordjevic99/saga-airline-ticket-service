@@ -23,13 +23,23 @@ public class PrepareForPaymentCommandHandler implements CommandHandler<PrepareFo
     @Override
     @Transactional
     public void handle(PrepareForPaymentCommand command) {
-        TicketOrder ticketOrder = ticketOrderRepository.findById(UUID.fromString(command.getTicketOrderId()))
-                .orElseThrow(() -> new ResourceNotFoundException("TicketOrder not found"));
-        OffsetDateTime expiresAt = OffsetDateTime.now().plusSeconds(50);
-        ticketOrder.setMiles(command.getMiles());
-        ticketOrder.setExpiresAt(expiresAt);
+        try {
+            TicketOrder ticketOrder = ticketOrderRepository.findById(UUID.fromString(command.getTicketOrderId()))
+                    .orElseThrow(() -> new ResourceNotFoundException("TicketOrder not found"));
+            if(!ticketOrder.getStatus().equals(TicketOrderStatus.SEAT_RESERVATION_REQUESTED)) {
+                log.warn("Rejecting this command: Ticket order {} must be in SEAT_RESERVATION_REQUESTED status for preparing payment",
+                        command.getTicketOrderId());
+                return;
+            }
 
-        log.info("Changing ticketOrder {} status to WAITING_FOR_PAYMENT", ticketOrder.getId());
-        ticketOrder.setStatus(TicketOrderStatus.WAITING_FOR_PAYMENT);
+            OffsetDateTime expiresAt = OffsetDateTime.now().plusSeconds(50);
+            ticketOrder.setMiles(command.getMiles());
+            ticketOrder.setExpiresAt(expiresAt);
+
+            log.info("Changing ticketOrder {} status to WAITING_FOR_PAYMENT", ticketOrder.getId());
+            ticketOrder.setStatus(TicketOrderStatus.WAITING_FOR_PAYMENT);
+        } catch(ResourceNotFoundException e) {
+            log.error("TicketOrder {} not found", command.getTicketOrderId());
+        }
     }
 }

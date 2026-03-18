@@ -17,4 +17,9 @@ public abstract class BaseMessage {
         this.id = UUID.randomUUID();
         this.timestamp = Instant.now();
     }
+
+    public BaseMessage(UUID id, Instant timestamp) {
+        this.id = id;
+        this.timestamp = timestamp;
+    }
 }

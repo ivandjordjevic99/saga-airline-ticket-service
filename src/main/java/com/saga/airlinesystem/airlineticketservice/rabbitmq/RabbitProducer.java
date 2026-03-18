@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import static com.saga.airlinesystem.airlineticketservice.rabbitmq.RabbitMQContsants.RESERVE_SEAT_REQUEST_KEY;
+
 @Service
 @Slf4j
 public class RabbitProducer {

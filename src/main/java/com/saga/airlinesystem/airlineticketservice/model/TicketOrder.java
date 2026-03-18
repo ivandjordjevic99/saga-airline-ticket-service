@@ -51,7 +51,7 @@ public class TicketOrder {
         OffsetDateTime now = OffsetDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
-        this.status = TicketOrderStatus.IN_PROGRESS;
+        this.status = TicketOrderStatus.CREATED;
         this.miles = 0;
     }
 

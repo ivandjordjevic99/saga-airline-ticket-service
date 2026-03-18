@@ -16,13 +16,14 @@ public class OutboxProcessorTask {
     private final OutboxEventRepository outboxEventRepository;
     private final RabbitProducer rabbitProducer;
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedDelay = 1000)
     public void process() {
         List<OutboxEvent> outboxes = outboxEventRepository.findTop10ByStatusOrderByCreatedAtDesc(OutboxEventStatus.PENDING);
 
         for (OutboxEvent outbox : outboxes) {
             rabbitProducer.sendEvent(outbox.getExchange(), outbox.getRoutingKey(), outbox.getPayload());
             outbox.setStatus(OutboxEventStatus.SENT);
+            outboxEventRepository.save(outbox);
             log.info("Outbox event {} sent to {} exchange, routing key {}", outbox.getId(), outbox.getExchange(), outbox.getRoutingKey());
         }
     }

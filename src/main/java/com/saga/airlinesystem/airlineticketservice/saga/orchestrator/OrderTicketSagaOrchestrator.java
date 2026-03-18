@@ -44,12 +44,10 @@ public class OrderTicketSagaOrchestrator {
 
     @Transactional
     public void startSaga(UUID ticketOrderId, TicketOrderRequestDto ticketOrderRequestDto) {
-        // Kreiranje saga instance koja prati biljezi dokle je stigla saga
         SagaInstance saga = new SagaInstance(SagaTransactionType.ORDER_TICKET, ticketOrderId);
         sagaInstanceRepository.save(saga);
         log.info("Saga instance {} for ticketOrder {} created", saga.getId(), ticketOrderId);
 
-        // Kreiranje objekta
         TicketOrder ticketOrder = new TicketOrder(
                 ticketOrderId,
                 ticketOrderRequestDto.getEmail(),
@@ -61,29 +59,36 @@ public class OrderTicketSagaOrchestrator {
         log.info("Transitioning saga instance {} to TICKET_ORDER_CREATED", saga.getId());
         saga.transitionTo(SagaState.TICKET_ORDER_CREATED);
 
-        // Cuvanje outbox eventa
         ValidatePassengerRequestMessage payload = new ValidatePassengerRequestMessage(ticketOrderId.toString(), ticketOrder.getEmail());
         outboxEventService.saveOutboxEvent(TICKET_BOOKING_EXCHANGE, PASSENGER_VALIDATION_REQUEST_KEY, payload);
     }
 
     @Transactional
     public void onPassengerValidated(PassengerValidationResultMessage payload) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
-                UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
-        log.info("Transitioning saga instance {} to PASSENGER_VALIDATED", sagaInstance.getId());
-        sagaInstance.transitionTo(SagaState.PASSENGER_VALIDATED);
-
-        commandBus.send(new ReserveSeatCommand(payload.getTicketOrderId()));
+        try {
+            SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
+                    UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException(
+                            "Saga instance for ticker order " + payload.getTicketOrderId() + " not found"));
+            log.info("Transitioning saga instance {} to PASSENGER_VALIDATED", sagaInstance.getId());
+            sagaInstance.transitionTo(SagaState.PASSENGER_VALIDATED);
+            commandBus.send(new ReserveSeatCommand(payload.getTicketOrderId()));
+        } catch (ResourceNotFoundException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Transactional
     public void onSeatReserved(SeatReservationResultMessage payload) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
-                UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
-        log.info("Transitioning saga instance {} to SEAT_RESERVED", sagaInstance.getId());
-        sagaInstance.transitionTo(SagaState.SEAT_RESERVED);
+        try {
+            SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
+                    UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
+            log.info("Transitioning saga instance {} to SEAT_RESERVED", sagaInstance.getId());
+            sagaInstance.transitionTo(SagaState.SEAT_RESERVED);
 
-        commandBus.send(new PrepareForPaymentCommand(payload.getTicketOrderId(), payload.getMiles()));
+            commandBus.send(new PrepareForPaymentCommand(payload.getTicketOrderId(), payload.getMiles()));
+        } catch (ResourceNotFoundException e) {
+            log.error(e.getMessage());
+        }
     }
 
     @Transactional
@@ -99,10 +104,15 @@ public class OrderTicketSagaOrchestrator {
 
     @Async
     public void onSagaFailed(UUID ticketOrderId) {
-        SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(ticketOrderId).orElseThrow(
-                () -> new ResourceNotFoundException("Saga instance not found")
-        );
-        compensate(sagaInstance);
+        try {
+            SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(ticketOrderId).orElseThrow(
+                    () -> new ResourceNotFoundException("Saga instance for ticket order " + ticketOrderId + " not found")
+            );
+            compensate(sagaInstance);
+        } catch (ResourceNotFoundException e) {
+            log.error(e.getMessage());
+        }
+
     }
 
     private void compensate(SagaInstance sagaInstance) {
