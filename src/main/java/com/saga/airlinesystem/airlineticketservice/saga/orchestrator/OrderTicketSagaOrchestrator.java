@@ -13,6 +13,7 @@ import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaTransactionType;
 import com.saga.airlinesystem.airlineticketservice.saga.repository.SagaInstanceRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.simulations.SimulationsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -32,6 +33,7 @@ public class OrderTicketSagaOrchestrator {
     private final SagaInstanceRepository sagaInstanceRepository;
     private final TicketOrderRepository ticketOrderRepository;
     private final OutboxEventService outboxEventService;
+    private final SimulationsUtil simulationsUtil;
     private final CommandBus commandBus;
     private static final List<SagaState> FLOW = List.of(
             SagaState.STARTED,
@@ -57,6 +59,7 @@ public class OrderTicketSagaOrchestrator {
         log.info("TicketOrder {} created", ticketOrder.getId());
 
         log.info("Transitioning saga instance {} to TICKET_ORDER_CREATED", saga.getId());
+        simulationsUtil.simulateDelay();
         saga.transitionTo(SagaState.TICKET_ORDER_CREATED);
 
         ValidatePassengerRequestMessage payload = new ValidatePassengerRequestMessage(ticketOrderId.toString(), ticketOrder.getEmail());
@@ -70,6 +73,7 @@ public class OrderTicketSagaOrchestrator {
                     UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException(
                             "Saga instance for ticker order " + payload.getTicketOrderId() + " not found"));
             log.info("Transitioning saga instance {} to PASSENGER_VALIDATED", sagaInstance.getId());
+            simulationsUtil.simulateDelay();
             sagaInstance.transitionTo(SagaState.PASSENGER_VALIDATED);
             commandBus.send(new ReserveSeatCommand(payload.getTicketOrderId()));
         } catch (ResourceNotFoundException e) {
@@ -83,6 +87,7 @@ public class OrderTicketSagaOrchestrator {
             SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
                     UUID.fromString(payload.getTicketOrderId())).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
             log.info("Transitioning saga instance {} to SEAT_RESERVED", sagaInstance.getId());
+            simulationsUtil.simulateDelay();
             sagaInstance.transitionTo(SagaState.SEAT_RESERVED);
 
             commandBus.send(new PrepareForPaymentCommand(payload.getTicketOrderId(), payload.getMiles()));
@@ -97,6 +102,7 @@ public class OrderTicketSagaOrchestrator {
         SagaInstance sagaInstance = sagaInstanceRepository.findByAggregateId(
                 ticketOrderId).orElseThrow(() -> new ResourceNotFoundException("Saga instance not found"));
         log.info("Transitioning saga instance {} to TICKET_ORDER_PAYED", sagaInstance.getId());
+        simulationsUtil.simulateDelay();
         sagaInstance.transitionTo(SagaState.TICKET_ORDER_PAYED);
 
         commandBus.send(new UpdatePassengerMilesCommand(ticketOrderId));
@@ -118,6 +124,7 @@ public class OrderTicketSagaOrchestrator {
     private void compensate(SagaInstance sagaInstance) {
         int lastIndex = FLOW.indexOf(sagaInstance.getState());
         log.info("Saga instance {} failed on state {}. Transitioning saga instance to FAILED", sagaInstance.getId(), sagaInstance.getState());
+        simulationsUtil.simulateDelay();
         sagaInstance.transitionTo(SagaState.FAILED);
         sagaInstanceRepository.saveAndFlush(sagaInstance);
 
@@ -125,7 +132,7 @@ public class OrderTicketSagaOrchestrator {
             SagaState state = FLOW.get(i);
             sendCompensationFor(state, sagaInstance);
         }
-
+        simulationsUtil.simulateDelay();
         sagaInstance.transitionTo(SagaState.COMPENSATED);
         sagaInstanceRepository.save(sagaInstance);
         log.info("Saga {} compensated", sagaInstance.getId());

@@ -10,6 +10,7 @@ import com.saga.airlinesystem.airlineticketservice.saga.commands.UpdatePassenger
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaInstance;
 import com.saga.airlinesystem.airlineticketservice.saga.model.SagaState;
 import com.saga.airlinesystem.airlineticketservice.saga.repository.SagaInstanceRepository;
+import com.saga.airlinesystem.airlineticketservice.saga.simulations.SimulationsUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public class UpdatePassengerMilesCommandHandler implements CommandHandler<Update
     private final OutboxEventService outboxEventService;
     private final TicketOrderRepository ticketOrderRepository;
     private final SagaInstanceRepository sagaInstanceRepository;
+    private final SimulationsUtil simulationsUtil;
 
     @Override
     @Transactional
@@ -48,6 +50,7 @@ public class UpdatePassengerMilesCommandHandler implements CommandHandler<Update
                 () -> new ResourceNotFoundException("SagaInstance with ticketOrder id " + ticketOrder.getId() + " not found")
         );
         log.info("Transitioning saga instance {} to FINISHED", sagaInstance.getId());
+        simulationsUtil.simulateDelay();
         sagaInstance.transitionTo(SagaState.FINISHED);
         sagaInstanceRepository.save(sagaInstance);
     }
